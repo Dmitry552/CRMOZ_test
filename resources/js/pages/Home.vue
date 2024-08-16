@@ -1,59 +1,48 @@
 <script setup lang="ts">
 import {useStore} from "../store";
-import {computed, ref} from "vue";
-import useInputGenerate from "../composables/useInputGenerate";
-import {IGetField} from "../store/modules/fields/types";
-import {useForm} from 'vee-validate';
-import useDataForForm from "../composables/useDataForForm";
+import {ref} from "vue";
+
+import spinner from '../images/spinner.svg';
+import CreateForm from "../components/CreateForm.vue";
 import swal from "sweetalert";
 
 const store = useStore();
-const {
-    getInputFields,
-    fieldsForm
-} = useInputGenerate();
-const {getDataForForm, dataForForm} = useDataForForm()
+
+const showAccount = ref(false);
+const showDeal = ref(false);
+const loading = ref(false);
+
 
 const defaultsFields = ref({
     account: ['Account_Name', 'Website', 'Phone'],
     deal: ['Deal_Name', 'Stage']
 });
 
-const getFields = (data) => store.dispatch('getFields', data);
 const createModules = (data) => store.dispatch('createModules', data);
+const createAccount = (data) => store.dispatch('createAccount', data);
+const createDeal = (data) => store.dispatch('createDeal', data);
 
-const fields = computed<IGetField[]>(() => store.getters.getFields);
-
-try {
-    await getFields(defaultsFields.value);
-    await getInputFields(fields.value);
-    await getDataForForm(fields.value);
-} catch (err) {
-    swal({
-        title: "Ops!",
-        text: err.data.error,
-        icon: "warning",
-    })
-}
-
-const {handleSubmit, errors, handleReset} = useForm(dataForForm.value);
-
-const handleSignUp = handleSubmit(value => {
-    createModules(value).then(() => {
-        swal({
-            title: "Ok!",
-            icon: "success",
-        });
-    }).catch((err) => {
+async function handleSubmit(value) {
+    try {
+        if (showDeal.value && !showAccount.value) {
+            await createDeal(value);
+        } else if (!showDeal.value && showAccount.value) {
+            await createAccount(value)
+        } else if (showDeal.value && showAccount.value) {
+            await createModules(value)
+        }
+    } catch (err) {
         swal({
             title: "Ops!",
             text: err.data.error,
             icon: "warning",
         })
-    }).finally(() => {
-        handleReset();
-    });
-});
+    }
+}
+
+function handleSetLoading(value) {
+    loading.value = value;
+}
 
 </script>
 
@@ -64,26 +53,34 @@ const handleSignUp = handleSubmit(value => {
                 class="w-full flex items-center justify-center p-4 mt-16 sm:mt-16"
             >
                 <div class="mx-auto w-full  max-w-[550px] bg-white">
-                    <form
-                        class="mt-4 space-y-4 lg:mt-5 md:space-y-5 "
-                    >
-                        <h3 class="mb-2 text-center text-lg font-bold text-gray-500">Account</h3>
-                        <div v-for="(field, index) in fieldsForm.account" :key="index">
-                            <component :is="field.component" v-bind="field.props"/>
-                        </div>
-                        <h3 class="mb-2 text-center text-lg font-bold text-gray-500">Deal</h3>
-                        <div v-for="(field, index) in fieldsForm.deal" :key="index">
-                            <component :is="field.component" v-bind="field.props"/>
+                    <div class="flex w-100 justify-center gap-4">
+                        <div>
+                            <input v-model="showAccount" type="checkbox" name="account" id="account">
+                            <label
+                                for="account"
+                            >
+                                Create Account
+                            </label>
                         </div>
                         <div>
-                            <button
-                                @click.prevent="handleSignUp"
-                                class="hover:shadow-form w-full rounded-md bg-[#6A64F1] py-3 px-8 text-center text-base
-                                    font-semibold text-white outline-none mt-4">
-                                Create
-                            </button>
+                            <input v-model="showDeal" type="checkbox" name="deal" id="deal">
+                            <label
+                                for="deal"
+                            >
+                                Create Deal
+                            </label>
                         </div>
-                    </form>
+                    </div>
+                    <div v-if="loading" class="h-[80px] flex w-100 justify-center">
+                        <img class="h-[100%]" :src="spinner" alt="spinner">
+                    </div>
+                    <CreateForm
+                        :defaultsFields="defaultsFields"
+                        :createAccount="showAccount"
+                        :createDeal="showDeal"
+                        @submit="handleSubmit"
+                        @setLoading="handleSetLoading"
+                    />
                 </div>
             </div>
         </main>

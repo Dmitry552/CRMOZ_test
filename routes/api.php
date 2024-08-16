@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\AccountController;
+use App\Http\Controllers\DealController;
 use App\Http\Controllers\ZohoController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -19,5 +21,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::post('/module', [ZohoController::class, 'createAccountAndDeal']);
+Route::post('/module', [ZohoController::class, 'createModules']);
+Route::post('/account', [AccountController::class, 'createAccount']);
+Route::post('/deal', [DealController::class, 'createDeal']);
 Route::get('/fields', [ZohoController::class, 'getRequiredFields']);

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\BadRequestException;
 use App\Http\Requests\CreateAccountAndDealRequest;
 use App\Http\Requests\GetRequiredFieldsRequest;
 use App\Http\Services\ZohoService;
@@ -16,11 +17,20 @@ class ZohoController extends Controller
         $this->service = $service;
     }
 
-    public function createAccountAndDeal(CreateAccountAndDealRequest $request): JsonResponse
+    /**
+     * @param CreateAccountAndDealRequest $request
+     * @return JsonResponse
+     * @throws BadRequestException
+     */
+    public function createModules(CreateAccountAndDealRequest $request): JsonResponse
     {
-        return $this->service->createAccountAndDeal($request->all());
+        return $this->service->createModules($request->all());
     }
 
+    /**
+     * @param GetRequiredFieldsRequest $request
+     * @return JsonResponse
+     */
     public function getRequiredFields(GetRequiredFieldsRequest $request): JsonResponse
     {
         return $this->service->getRequiredFields($request->all());

@@ -25,7 +25,7 @@ class ZohoService
      * @return JsonResponse
      * @throws BadRequestException
      */
-    public function createAccountAndDeal(array $data): JsonResponse
+    public function createModules(array $data): JsonResponse
     {
         $accountData = $data['account'];
         $dealData = $data['deal'];
@@ -36,7 +36,10 @@ class ZohoService
             throw new BadRequestException('Account not created');
         }
 
-        $dealData['Account_Name'] = $account['data'][0]['details']['id'];
+        if (isset($data['link']) && $data['link']) {
+            $dealData['Account_Name'] = $account['data'][0]['details']['id'];
+        }
+
         $dealData = $this->dealService->createDeal($dealData);
 
         if ($dealData['data'][0]['status'] !== 'success') {
@@ -53,40 +56,41 @@ class ZohoService
     public function getRequiredFields(array $data): JsonResponse
     {
         $filter = null;
+        $filteredData = [];
 
         if (isset($data['fields'])) {
             $filter = json_decode($data['fields']);
         }
 
-        $accountsFields = $this->accountService->getAccountFields();
-        $dealsFields = $this->dealService->getDealFields();
+        foreach ($filter as $key => $value) {
+            $service = $key."Service";
 
-        $filteredAccounts = $this->filterFieldsForRequired(
-            $accountsFields,
-            'account',
-            $filter
-        );
-        $filteredDeals = $this->filterFieldsForRequired(
-            $dealsFields,
-            'deal',
-            $filter
-        );
+            $fields = $this->$service->getFields(ucfirst($key)."s");
 
-        return response()->json(array_merge($filteredAccounts, $filteredDeals));
+            $filtered = $this->filterFieldsForRequired(
+                $fields,
+                $key,
+                $value
+            );
+
+            $filteredData = array_merge($filteredData,  $filtered);
+        }
+
+        return response()->json($filteredData);
     }
 
     /**
      * @param array $data
      * @param string $key
-     * @param object|null $filter
+     * @param array|null $filter
      * @return array[]
      */
-    private function filterFieldsForRequired(array $data, string $key, object|null $filter = null): array
+    private function filterFieldsForRequired(array $data, string $key, array|null $filter = null): array
     {
         $results = [];
 
         foreach ($data as $item) {
-            if ($item['system_mandatory'] || in_array($item['api_name'], $filter->$key)) {
+            if ($item['system_mandatory'] || in_array($item['api_name'], $filter)) {
                 $results[] = $item;
             }
         }

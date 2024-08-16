@@ -13,8 +13,10 @@ function useDataForForm() {
             initialValues[item] = generateInitialValues(fields[item])
         }
 
+        initialValues['link'] = false;
+
         dataForForm.value = {
-            validationSchema: computed(() => object(rules)),
+            validationSchema: rules,
             initialValues: initialValues
         }
     }

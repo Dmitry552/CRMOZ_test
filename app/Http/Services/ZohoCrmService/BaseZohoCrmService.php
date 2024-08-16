@@ -7,7 +7,7 @@ use Illuminate\Http\Client\Response;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Support\Facades\Http;
 
-abstract class BaseZohoCrmService
+class BaseZohoCrmService
 {
     const BASEURL = "https://www.zohoapis.eu/crm";
 
@@ -18,6 +18,7 @@ abstract class BaseZohoCrmService
     public function __construct(ZohoCrmAuth $auth)
     {
         $this->auth = $auth;
+        $this->accessToken = $this->auth->getToken();
     }
 
     /**
@@ -67,8 +68,6 @@ abstract class BaseZohoCrmService
         array|null $headers = null,
         array|null $params = null
     ): self {
-        $this->accessToken = $this->auth->getToken();
-
         $baseHeaders = [
             'Authorization' => 'Zoho-oauthtoken ' . $this->accessToken
         ];
@@ -92,10 +91,8 @@ abstract class BaseZohoCrmService
      * @param string $moduleName
      * @return mixed
      */
-    protected function getRequiredFields(string $moduleName)
+    protected function getFields(string $moduleName): mixed
     {
-        $moduleName = ucfirst($moduleName);
-
         $response = $this->query(null, [
             'module' => $moduleName
         ])->get('/v7/settings/fields');
