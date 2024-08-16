@@ -23,13 +23,27 @@ const createAccount = (data) => store.dispatch('createAccount', data);
 const createDeal = (data) => store.dispatch('createDeal', data);
 
 async function handleSubmit(value) {
+    let response = {};
     try {
         if (showDeal.value && !showAccount.value) {
-            await createDeal(value);
+            response = await createDeal(value);
         } else if (!showDeal.value && showAccount.value) {
-            await createAccount(value)
+            response = await createAccount(value)
         } else if (showDeal.value && showAccount.value) {
-            await createModules(value)
+            response = await createModules(value)
+        }
+
+        if (response.status === 'success') {
+            swal({
+                title: "Ok!",
+                icon: "success",
+            })
+        } else {
+            swal({
+                title: "Ops!",
+                text: response.message,
+                icon: "warning",
+            })
         }
     } catch (err) {
         swal({

@@ -6,8 +6,8 @@ export const createModules: CustomAction = (
     data
 ): Promise<any> => {
     return new Promise((resolve, reject) => {
-        $http.post(`/api/module`, data).then(() => {
-            resolve();
+        $http.post(`/api/module`, data).then(({data}) => {
+            resolve(data);
         }).catch((err) => {
             reject(err);
         });
