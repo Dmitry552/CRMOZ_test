@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import {useStore} from "../store";
 import {ref} from "vue";
+import Header from "../components/Header.vue";
 
 import spinner from '../images/spinner.svg';
 import CreateForm from "../components/CreateForm.vue";
@@ -63,6 +64,7 @@ function handleSetLoading(value) {
 <template>
     <div class="w-full pb-4">
         <main class="bg-white h-full px-2 flex justify-center items-start">
+            <Header/>
             <div
                 class="w-full flex items-center justify-center p-4 mt-16 sm:mt-16"
             >

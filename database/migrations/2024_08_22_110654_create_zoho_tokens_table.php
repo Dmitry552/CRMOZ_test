@@ -11,10 +11,17 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('zoho_access_tokens', function (Blueprint $table) {
+        Schema::create('zoho_tokens', function (Blueprint $table) {
             $table->id();
-            $table->string('token')->unique();
+            $table->unsignedBigInteger('user_id');
+            $table->string('access_token')->nullable();
+            $table->string('refresh_token');
             $table->timestamps();
+
+            $table->foreign('user_id')
+                ->references('id')
+                ->on('users')
+                ->onDelete('cascade');
         });
     }
 
@@ -23,6 +30,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('zoho_access_tokens');
+        Schema::dropIfExists('zoho_tokens');
     }
 };

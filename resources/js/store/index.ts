@@ -5,6 +5,7 @@ import FieldModule from "./modules/fields";
 import Module from "./modules/module";
 import AccountModule from "./modules/account";
 import DealModule from "./modules/deal";
+import UserModule from "./modules/user";
 
 export const key: InjectionKey<Store<TRootState>> = Symbol();
 
@@ -13,7 +14,8 @@ export const store: Store<TRootState> = createStore<TRootState>({
         field: FieldModule,
         account: AccountModule,
         deal: DealModule,
-        module: Module
+        module: Module,
+        user: UserModule
     }
 });
 

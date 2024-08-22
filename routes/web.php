@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AuthZohoController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -12,6 +13,17 @@ use Illuminate\Support\Facades\Route;
 | be assigned to the "web" middleware group. Make something great!
 |
 */
+
+Route::get('/zoho/redirect', [AuthZohoController::class, 'redirect'])->name('redirect');
+Route::get('/zoho/callback', [AuthZohoController::class, 'callback']);
+
+Route::get('/registration', function () {
+    return view('signUp');
+})->name('signUp');
+
+Route::get('/zohoForm', function () {
+    return view('zohoForm');
+})->name('zohoForm');
 
 Route::get('{path}', function () {
     return view('index');

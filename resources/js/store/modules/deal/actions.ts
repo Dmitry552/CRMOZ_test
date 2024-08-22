@@ -1,12 +1,12 @@
-import {$http} from "../../../utils/http";
+import {$authHttp} from "../../../utils/http";
 import {CustomAction} from "../../types";
 
 export const createDeal: CustomAction = (
     {},
-    data
+    payload
 ): Promise<any> => {
     return new Promise((resolve, reject) => {
-        $http.post(`/api/deal`, data).then(({data}) => {
+        $authHttp.post(`/api/deal`, payload).then(({data}) => {
             resolve(data);
         }).catch((err) => {
             reject(err);

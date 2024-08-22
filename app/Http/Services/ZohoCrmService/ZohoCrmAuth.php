@@ -3,39 +3,40 @@
 namespace App\Http\Services\ZohoCrmService;
 
 use App\Exceptions\BadRequestException;
-use Illuminate\Support\Facades\DB;
+use App\Models\ZohoToken;
 use Illuminate\Support\Facades\Http;
 
 class ZohoCrmAuth
 {
     /**
      * @return string
+     * @throws BadRequestException
      */
     public function getToken(): string
     {
-        $response =  DB::table('zoho_access_tokens')
-            ->select('token')
-            ->first();
+        $zohoToken = auth('user')->user()->zohoToken;
 
-        if (!$response) {
+        if (!$zohoToken->access_token) {
             return $this->setToken();
         }
 
-        return $response->token;
+        return $zohoToken->access_token;
     }
 
     /**
      * @return string
+     * @throws BadRequestException
      */
     public function setToken(): string
     {
-        $token = $this->refreshToken();
+        /** @var ZohoToken $zohoToken */
+        $zohoToken = auth('user')->user()->zohoToken;
 
-        DB::table('zoho_access_tokens')
-            ->limit(1)
-            ->update([
-                'token' => $token
-            ]);
+        $token = $this->refreshToken($zohoToken->refresh_token);
+
+        $zohoToken->update([
+            'access_token' => $token
+        ]);
 
         return $token;
     }
@@ -44,9 +45,8 @@ class ZohoCrmAuth
      * @return mixed|void
      * @throws BadRequestException
      */
-    public function refreshToken()
+    public function refreshToken(string $refresh_token)
     {
-        $refresh_token = env('ZOHO_REFRESH_TOKEN');
         $client_id = env('ZOHO_CLIENT_ID');
         $client_secret = env('ZOHO_CLIENT_SECRET');
 
